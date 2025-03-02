@@ -10,7 +10,6 @@ int util_find_non_zero_pos_mips(const void* src,int sz) {
 	asm  volatile (
 		".set	push\n"
 		".set	noreorder\n"
-		".text	\n"
 		".align 4\n"
 
 		"beq	%0,$0,55f\n" 
@@ -53,7 +52,6 @@ void util_cpy_lcd_buf_mips(void* dst,const void* src) {
 	asm  volatile (
 		".set	push\n"
 		".set	noreorder\n"
-		".text	\n"
 		".align 4\n"
 
  		"addiu	$sp,$sp,-(10 * 4)\n"

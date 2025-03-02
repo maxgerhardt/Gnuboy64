@@ -15,7 +15,7 @@ fs_handle_t* _fs_alloc_handle() {
 	for (i = 0;i < FS_MAX_HANDLES;++i) {
 		if (_fs_handle_flags[i] == 0) {
 			_fs_handle_flags[i]=1;
-			memset( &_fs_handle_flags[i] ,0,sizeof(fs_handle_t));
+			memset( &_fs_handles[i] ,0,sizeof(fs_handle_t));
 			return & _fs_handles[i];
 		}
 	}

@@ -1,12 +1,12 @@
 #include <libdragon.h>
 #include "interrupts.h"
 
-void ints_dump_regs(TExceptionBlock* e)
+void ints_dump_regs(exception_t* e)
 {
 	//dummy
 }
 
-void onException(TExceptionBlock* e)
+void onException(exception_t* e)
 {
 	switch(e->type)
 	{

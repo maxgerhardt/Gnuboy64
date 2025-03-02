@@ -273,7 +273,7 @@ uint32_t __rdp_srec_compile_ld_tex(rpd_srec_compiled_instruction_block_t* inst_s
     rdp_srec_write_bc(   (uint32_t)UncachedAddr(sprite->data) );
     rdp_srec_write_bc( 0xF5000000 | ((sprite->bitdepth == 2) ? 0x00100000 : 0x00180000) | 
                                        (((((real_width >> 3) + round_amount) * sprite->bitdepth) & 0x1FF) << 9) | ((texloc >> 3) & 0x1FF) );
-    rdp_srec_write_bc( ((texslot) << 24) | (mirror_enabled == MIRROR_ENABLED ? 0x40100 : 0) | (hbits << 14 ) | (wbits << 4) );
+    rdp_srec_write_bc( ((texslot) << 24) | (mirror_enabled != MIRROR_DISABLED ? 0x40100 : 0) | (hbits << 14 ) | (wbits << 4) );
 
     rdp_srec_write_bc( 0xF4000000 | (((sl << 2) & 0xFFF) << 12) | ((tl << 2) & 0xFFF) );
     rdp_srec_write_bc( (((sh << 2) & 0xFFF) << 12) | ((th << 2) & 0xFFF) );

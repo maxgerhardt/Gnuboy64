@@ -177,7 +177,7 @@ static byte* load_file_n64(fs_handle_t* f,const char* romfile) {
 	if (!res) {
 		res = malloc((flen + 64) & (~63));
 		if (!res) {
-			die("Out of memory!");
+			gnuboy_die("Out of memory!");
 		}
 		rom_size = 0;
 	}
@@ -195,7 +195,7 @@ static byte* load_file_n64(fs_handle_t* f,const char* romfile) {
 	//Otherwise use it all
 	res = fs_drv_get_extended_mem();
 	if (!res) {
-		die("fs_drv_get_extended_mem fail!");
+		gnuboy_die("fs_drv_get_extended_mem fail!");
 	}
 	fs_drv_cpy_file_to_extended_mem(romfile);
  
@@ -235,8 +235,8 @@ int rom_load(const char* romfile)
 	mbc.romsize = romsize_table[header[0x0148]];
 	mbc.ramsize = ramsize_table[header[0x0149]];
 
-	if (!mbc.romsize) die("unknown ROM size %02X\n", header[0x0148]);
-	if (!mbc.ramsize) die("unknown SRAM size %02X\n", header[0x0149]);
+	if (!mbc.romsize) gnuboy_die("unknown ROM size %02X\n", header[0x0148]);
+	if (!mbc.ramsize) gnuboy_die("unknown SRAM size %02X\n", header[0x0149]);
 
 #if 0
 	rlen = 16384 * mbc.romsize;
@@ -264,7 +264,7 @@ int rom_load(const char* romfile)
 }
 
 #else
-
+#pragma GCC diagnostic ignored "-Wstringop-overread"
 int rom_load(const char* romfile)
 {
  	
@@ -278,7 +278,7 @@ int rom_load(const char* romfile)
 		uint32_t game_len = ((uint32_t)dummy[0] << 24U) | ((uint32_t)dummy[1] << 16U) | ((uint32_t)dummy[2] << 8U) | ((uint32_t)dummy[3]);
 		uint32_t state_len = ((uint32_t)dummy[4] << 24U) | ((uint32_t)dummy[5] << 16U) | ((uint32_t)dummy[6] << 8U) | ((uint32_t)dummy[7]);
 		header = malloc(game_len);
-		if (!header)die("rom_load : out of mem!\n");
+		if (!header)gnuboy_die("rom_load : out of mem!\n");
 		ctl_dma_rom_rd(header,256 + state_len,game_len);
 	}
  
@@ -295,11 +295,11 @@ int rom_load(const char* romfile)
 	mbc.romsize = romsize_table[header[0x0148]];
 	mbc.ramsize = ramsize_table[header[0x0149]];
 
-	if (!mbc.romsize) die("unknown ROM size %02X\n", header[0x0148]);
-	if (!mbc.ramsize) die("unknown SRAM size %02X\n", header[0x0149]);
+	if (!mbc.romsize) gnuboy_die("unknown ROM size %02X\n", header[0x0148]);
+	if (!mbc.ramsize) gnuboy_die("unknown SRAM size %02X\n", header[0x0149]);
 
-	rom.bank = header;//malloc(rs);
-	//if (!rom.bank) die("out of memory");
+	rom.bank = (void*) header;//malloc(rs);
+	//if (!rom.bank) gnuboy_die("out of memory");
 	//memcpy(rom.bank,header,rs);
  
 

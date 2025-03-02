@@ -78,7 +78,7 @@ byte g_curr_snd_driver = 0;
 static uint16_t screen_info_changed = 0,screenshot_n = 0;
 static uint16_t frame_buffer_w = 0,frame_buffer_h = 0,frame_buffer_bpp  = 0,screen_w = 0,screen_h = 0,screen_bpp = 0;
 static uint8_t* frame_buffer = 0;
-static display_context_t binded_display_ctx = 0xffff;
+static surface_t* binded_display_ctx = NULL;
 static struct controller_data controller;
 static int32_t last_button_data = 0;
 static rpd_srec_compiled_instruction_block_t* rdp_compiled_scene = 0;
@@ -130,7 +130,7 @@ void show_error(const char* s)
 	}
 }
 
-void die(char *fmt, ...)
+void gnuboy_die(char *fmt, ...)
 {
     char buf[512];
  
@@ -260,14 +260,14 @@ static void fb_init(int rdp_fb,int scale)
 static void switch_display(int32_t hi_res,int32_t depth,int32_t clear_fb,int32_t force) 
 {
 	static uint16_t was_inited = 0;
-	display_context_t disp = 0;
+	surface_t* disp = 0;
 	int32_t new_w,new_h,new_bpp;
 
 	new_bpp = depth>>3;
 	if (hi_res) { new_w = 512; new_h = 480; }
 	else { new_w = 256; new_h = 240; }
 	
-	if ((!force)&&(new_w == screen_w) && (new_h == screen_h) && (new_bpp == screen_bpp) && (was_inited) && (0xfff != binded_display_ctx)) {
+	if ((!force)&&(new_w == screen_w) && (new_h == screen_h) && (new_bpp == screen_bpp) && (was_inited) && (NULL != binded_display_ctx)) {
 		if (clear_fb) { graphics_fill_screen(binded_display_ctx, 0); }
 		return;
 	}
@@ -288,7 +288,8 @@ static void switch_display(int32_t hi_res,int32_t depth,int32_t clear_fb,int32_t
 	if (clear_fb) { graphics_fill_screen(disp, 0); }
 	display_show(disp); 
 
-	frame_buffer = (uint8_t*)display_grab_framebuffer_ptr(disp);//non cached
+	//frame_buffer = (uint8_t*)display_grab_framebuffer_ptr(disp);//non cached
+	frame_buffer = display_get()->buffer;
 	binded_display_ctx = disp;
 
 	screen_w = new_w;
@@ -303,10 +304,9 @@ static int32_t init_everything()
  
 	rdp_scene_buffer = 0;
 	rdp_compiled_scene = 0;
-	init_interrupts();	
 	res = fs_drv_init(0,0);
-	sys_set_boot_cic(6102);
-    controller_init();
+	//sys_set_boot_cic(6102);
+    joypad_init();
 
  	pcm_rbuf_init(8000,2,2048 );
 	
@@ -485,7 +485,7 @@ void browse_rom_data(uint32_t base_offset) {
 
 	uint32_t upd = 1,disp_mode = 0; //0 = hex
 	uint8_t buf[256];
-	char conv[32];
+	char conv[64];
 
 	while (1) {
 		controller_read(&controller); 
@@ -515,7 +515,7 @@ void browse_rom_data(uint32_t base_offset) {
 			const uint32_t ls = screen_w - sx ;
 			
 
-			sprintf(conv,"LOC : 0x%08x |MODE=%s| R=+1M,L=-1M,Cu/u=+/-,Cl/r=disp,Z=Exit",base_offset,(disp_mode==0)?"H":"C");
+			sprintf(conv,"LOC : 0x%08x |MODE=%s| R=+1M,L=-1M,Cu/u=+/-,Cl/r=disp,Z=Exit",(unsigned) base_offset,(disp_mode==0)?"H":"C");
   			graphics_draw_text(binded_display_ctx,sx,56,conv);
 			for (;i < sizeof(buf);++i) {
 				sprintf(conv,(disp_mode==0) ? "%02x" : "%c",buf[i]);
@@ -654,7 +654,7 @@ int main()
  
 
 			uint8_t* state = malloc(state_len);
-			if (!state) die("Unable to allocate %u for state",state_len);
+			if (!state) gnuboy_die("Unable to allocate %u for state",state_len);
 			ctl_dma_rom_rd(state,256  ,state_len);
 			loadstate_ptr(state,state_len);
 			vram_dirty();

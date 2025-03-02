@@ -338,7 +338,7 @@ void loadstate_ptr(byte* buf,un32 buf_size)
 	return;
 
 loadstate_fail:
-	die("Load state fail(STATE > 128K)");
+	gnuboy_die("Load state fail(STATE > 128K)");
 }
 
 void loadstate(fs_handle_t *f)
@@ -348,7 +348,7 @@ void loadstate(fs_handle_t *f)
 	un32 buf_size=128*1024;
 	byte* buf = malloc(buf_size);
 	if (!buf) {
-		die("load state:out of mem");
+		gnuboy_die("load state:out of mem");
 		return;
 	}
  
@@ -372,7 +372,7 @@ void savestate(fs_handle_t *f)
 	byte* buf;
 	buf = malloc(buf_size);
 	if (!buf) {
-		die("save state:out of mem");
+		gnuboy_die("save state:out of mem");
 		return;
 	}
 	un32 (*header)[2] = (un32 (*)[2])buf;
@@ -447,7 +447,7 @@ void savestate(fs_handle_t *f)
 
 savestate_fail:
 	free(buf);
-	die("Save State fail(STATE > 128K)");
+	gnuboy_die("Save State fail(STATE > 128K)");
 }
 #endif
 

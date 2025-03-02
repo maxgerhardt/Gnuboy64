@@ -10,7 +10,7 @@
 #define CALC_BUFFER(x)  ( ( ( ( x ) / 25 ) >> 3 ) << 3 )
  
 /*N64 PORT newlib lacks def so use u32 for this platform*/
-typedef uint32_t ptrdiff_t;
+//typedef uint32_t ptrdiff_t;
 
 
 typedef struct AI_regs_s {
@@ -34,7 +34,7 @@ typedef struct AI_regs_s {
     uint32_t samplesize;
 } AI_regs_t;
 
-extern struct  __attribute__ ((aligned (16))) pcm;
+extern struct  pcm __attribute__ ((aligned (16))) pcm;
 
 static pcm_rbuf_mode_t pcm_rbuf_mode = PCMRBUF_MODE_IMMEDIATE;
 static uint8_t pcm_rbuf_handler_installed = 0;
@@ -149,7 +149,9 @@ void pcm_rbuf_int() {
 
 int32_t pcm_rbuf_init(const int32_t freq,const int32_t queue_buffers,const int32_t rbuf_chunks) {
  
-	audio_init_ex(freq,queue_buffers,CALC_BUFFER(freq) >> 2,AS_FM_STREAM,pcm_rbuf_int);
+	//audio_init_ex(freq,queue_buffers,CALC_BUFFER(freq) >> 2,AS_FM_STREAM,pcm_rbuf_int);
+	audio_init(freq, queue_buffers);
+	//register_AI_handler(pcm_rbuf_int);
 
 	pcm_rbuf_stride = audio_get_buffer_length() * sizeof(short) * 2;
 	pcm_rbuf_tail = pcm_rbuf_stride * rbuf_chunks;
@@ -162,7 +164,7 @@ int32_t pcm_rbuf_init(const int32_t freq,const int32_t queue_buffers,const int32
 	pcm_rbuf_eos = 0;
 	memset(&pcm,0,sizeof pcm);
  
-	pcm_rbuf_nsamples = audio_get_num_samples();
+	pcm_rbuf_nsamples = audio_get_buffer_length(); //audio_get_num_samples();
 	pcm.hz = audio_get_frequency();
 	pcm.stereo = 1;
 	pcm.len = pcm_rbuf_stride ;

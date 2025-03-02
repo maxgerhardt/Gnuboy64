@@ -14,7 +14,6 @@ void lcd_flush_vram_list_mips(int list_size,unsigned char* vram) {
 		".set	push\n"
 		".set	noreorder\n"
 		".set	noat\n"
-		".text	\n"
 		".align 4\n"
 
 		"addiu	$sp,$sp,-(8 * 4)\n"
@@ -295,7 +294,6 @@ int lcd_spr_enum_mips_R_LCDC_case(void* obj_struct_base_ptr,void* vis_sprite_str
 		".set	push\n"
 		".set	noreorder\n"
 		 
-		".text	\n"
 		".align 4\n"
 
 		"addiu	$sp,$sp,-(8 * 4)\n"
@@ -438,7 +436,6 @@ int lcd_spr_enum_mips(void* obj_struct_base_ptr,void* vis_sprite_struct_base_ptr
 		".set	push\n"
 		".set	noreorder\n"
 		 
-		".text	\n"
 		".align 4\n"
 
 		"addiu	$sp,$sp,-(8 * 4)\n"
@@ -559,7 +556,6 @@ void lcd_bg_scan_pri_mips(void* dest,void* src,int cnt,int i) {
 	asm  volatile (
 		".set	push\n"
 		".set	noreorder\n"
-		".text	\n"
 		".align 4\n"
 
 		"addu	$t0,$0,%0\n"	//dest
@@ -658,7 +654,7 @@ void lcd_tilebuf_gbc_pass1_mips(unsigned char* tilemap,unsigned char* attrmap,in
 		".set	push\n"
 		".set	noreorder\n"
 		//".set	noat\n"
-		".text\n"
+		
 		".align 4\n"
 
 		"addu	$t0,$0,%0\n" //tilemap
@@ -703,7 +699,7 @@ void lcd_tilebuf_gbc_pass2_mips(unsigned char* tilemap,unsigned char* attrmap,in
 		".set	push\n"
 		".set	noreorder\n"
 		".set	noat\n"
-		".text\n"
+		
 		".align 4\n"
 
 		"addu	$t0,$0,%0\n" //tilemap
@@ -743,7 +739,7 @@ void lcd_tilebuf_gb_pass1_stride_mips(unsigned char* tilemap,int* tilebuf,int cn
 		".set	push\n"
 		".set	noreorder\n"
 		//".set	noat\n"
-		".text\n"
+		
 		".align 4\n"
 
 		"addu	$t0,$0,%0\n" //tilemap
@@ -777,7 +773,7 @@ void lcd_tilebuf_gb_pass1_mips(unsigned char* tilemap,int* tilebuf,int cnt,const
 		".set	push\n"
 		".set	noreorder\n"
 		//".set	noat\n"
-		".text\n"
+		
 		".align 4\n"
 
 		"addu	$t0,$0,%0\n" //tilemap
@@ -810,7 +806,7 @@ void lcd_tilebuf_gb_pass2_mips(unsigned char* tilemap,int* tilebuf,int cnt) {
 		".set	push\n"
 		".set	noreorder\n"
 		//".set	noat\n"
-		".text\n"
+		
 		".align 4\n"
 
 		"addu	$t0,$0,%0\n" //tilemap
@@ -872,7 +868,7 @@ void lcd_tilebuf_gb_pass2_stride_mips(unsigned char* tilemap,int* tilebuf,int cn
 		".set	push\n"
 		".set	noreorder\n"
 		//".set	noat\n"
-		".text\n"
+		
 		".align 4\n"
 
 		"addu	$t0,$0,%0\n" //tilemap
@@ -946,7 +942,7 @@ void lcd_blendcpy_block_mips(void* dest,void* tile_buf,int vcoord,int cnt) {
 	asm  volatile (
 		".set	push\n"
 		".set	noreorder\n"
-		".text\n"
+		
 		".align 4\n"
 
 		"addu	$t0,$0,%0\n" //dest
@@ -1155,7 +1151,7 @@ void lcd_cpy_block_mips(void* dest,void* tile_buf,int vcoord,int cnt) {
 	asm  volatile (
 		".set	push\n"
 		".set	noreorder\n"
-		".text\n"
+		
 		".align 4\n"
 
 		"addu	$t0,$0,%0\n" //dest
@@ -1336,7 +1332,7 @@ void lcd_recolor_mips(unsigned char *buf, unsigned char fill,int cnt) { /*GB mod
 	asm  volatile (
 		".set	push\n"
 		".set	noreorder\n"
-		".text\n"
+		
 		".align 4\n"
 		//".set	noat\n"
 
@@ -1507,7 +1503,7 @@ void lcd_refresh_line_2_mips(void* dest,void* src,void* pal) { /*For 1xscale : 1
 		".set	push\n"
 		".set	noreorder\n"
 		".set	noat\n"
-		".text\n"
+		
 		".align 4\n"
 
  
@@ -1613,7 +1609,7 @@ void lcd_refresh_line_4_mips(void* dest,void* src,void* pal) { /*For 2xscale : 1
 		".set	push\n"
 		".set	noreorder\n"
 		".set	noat\n"
-		".text\n"
+		
 		".align 4\n"
 
 		"addiu	$sp,$sp,-(8 * 4)\n"
@@ -1707,7 +1703,6 @@ void lcd_scan_color_cgb_mips(void* dst,const void* src,void* pr,void* bgr,int sz
 	asm  volatile (
 		".set	push\n"
 		".set	noreorder\n"
-		".text	\n"
 		".align 4\n"
 
 		"ble	%4,$0,55f\n" 
@@ -1792,7 +1787,6 @@ void lcd_scan_color_pri_mips(void* dst,const void* src,void* pr,void* bgr,int sz
 	asm  volatile (
 		".set	push\n"
 		".set	noreorder\n"
-		".text	\n"
 		".align 4\n"
 
 		"beq	%4,$0,55f\n" 

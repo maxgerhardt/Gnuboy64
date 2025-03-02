@@ -57,7 +57,7 @@ static uint8_t __attribute__((aligned(16))) dma_buffer[256];
 static uint8_t signature[16];
 
 extern void delay_secs(int32_t secs);
-extern void die(char *fmt, ...);
+extern void gnuboy_die(char *fmt, ...);
 
 static inline uint32_t get_rom_space_addr() {
 	const uint32_t base = (uint32_t)0xB0000000U;
@@ -100,7 +100,7 @@ static volatile void dma2_read(void * ram_address, unsigned long pi_address, uns
 
     enable_interrupts();
 
-	//if (err)die("dma2_read error");
+	//if (err)gnuboy_die("dma2_read error");
 }
 
 static volatile void dma2_write(void * ram_address, unsigned long pi_address, unsigned long len) {
@@ -125,7 +125,7 @@ static volatile void dma2_write(void * ram_address, unsigned long pi_address, un
 	//err = dma2_err();
 
     enable_interrupts();
-	//if (err)die("dma2_write error");
+	//if (err)gnuboy_die("dma2_write error");
 }
 
 void ctl_set_signature(const char* sig) {
@@ -156,7 +156,7 @@ void ctl_write_state(const void* src,int len,int block) {
 	if (block >= state_blocks)
 		return;
 	else if (len > 128 * 1024)
-		die("write_state > 128KB");
+		gnuboy_die("write_state > 128KB");
 
 	uint8_t sig[128];
 	ctl_sram_rd(sig,0,128);
@@ -169,7 +169,7 @@ void ctl_read_state(void* dst,int len,int block) {
 	if (block >= state_blocks)
 		return;
 	else if (len > 128 * 1024)
-		die("read_state > 128KB");
+		gnuboy_die("read_state > 128KB");
 
 
 	uint8_t sig[128];

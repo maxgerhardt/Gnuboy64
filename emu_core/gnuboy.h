@@ -41,7 +41,7 @@ void sys_checkdir(char *path, int wr);
 void sys_sanitize(char *s);
 void sys_initpath(char *exe);
 void doevents();
-void die(char *fmt, ...);
+void gnuboy_die(char *fmt, ...);
 
 #ifndef GNUBOY_NO_PRINTF
 #define debug_printf_init()
