@@ -91,7 +91,7 @@ static char* savedir = NULL;
  
 static char sramfile[MAX_ROM_PATH];
 static char rtcfile[MAX_ROM_PATH];
-static char saveprefix[MAX_ROM_PATH];
+static char saveprefix[2*MAX_ROM_PATH];
 static const char *savedir="/gnuboy/saves";
 #endif
 
@@ -376,7 +376,7 @@ void state_save(int n)
 {
 #if __FS_BUILD__ != FS_N64_ROMFS
 	fs_handle_t* f;
-	char name[MAX_ROM_PATH+8];
+	char name[4*MAX_ROM_PATH+8];
 
 	sprintf(name, "%s.%03d", saveprefix, n);
 
@@ -396,10 +396,10 @@ void state_load(int n)
 {
 #if __FS_BUILD__ != FS_N64_ROMFS
 	fs_handle_t* f;
-	char name[MAX_ROM_PATH+8];
+	char name[4*MAX_ROM_PATH+8];
 
  
-	sprintf(name, "%s.%03d", saveprefix, n);
+	snprintf(name, sizeof(name), "%s.%03d", saveprefix, n);
 	data_cache_hit_writeback_invalidate(name,sizeof(name));
 
 	if ((f = fs_open(name, "rb")))
@@ -540,7 +540,7 @@ void loader_init(char *s)
 	strcat(rtcfile, ".rtc");
 #else
 
-	sprintf(saveprefix, "%s%s%s", savedir, DIRSEP, name);
+	snprintf(saveprefix, sizeof(saveprefix) - 1, "%s%s%s", savedir, DIRSEP, name);
 	data_cache_hit_writeback_invalidate(saveprefix,sizeof(saveprefix));
 	strcpy(sramfile, saveprefix);
 	strcpy(rtcfile, saveprefix);

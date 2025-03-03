@@ -228,7 +228,7 @@ int ctl_read_rtc(void* dst,int len) {	//reserve 128-16 bytes for rtc
 }
 
 void ctl_build_initial_state_block() {
-	uint8_t sig[128];
+	uint8_t sig[128] __aligned(16);
 
 	ctl_sram_rd(sig,0,128);
 	if ( 0 == memcmp(signature,sig,sizeof(signature)) )

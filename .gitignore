@@ -1,5 +1,7 @@
 .pio
 .vscode
+assets/*.gb
+assets/*.gbc
 
 # Prerequisites
 *.d

@@ -115,7 +115,8 @@ void show_error(const char* s)
 	graphics_draw_text( binded_display_ctx,(screen_w/2) - ( (strlen(s)<<3) >> 1 ),(screen_h/2) + 8,s);
 	graphics_draw_text( binded_display_ctx,(screen_w/2) - ( (strlen("PRESS Z TO REBOOT")<<3) >> 1 ),(screen_h/2) +98,"PRESS Z TO REBOOT");
 	graphics_draw_text( binded_display_ctx,(screen_w/2) - ( (strlen("PRESS Cr TO TAKE SCREENSHOT")<<3) >> 1 ),(screen_h/2) +106,"PRESS Cr TO TAKE SCREENSHOT");
-	enable_interrupts();
+	if(get_interrupts_state() == INTERRUPTS_DISABLED)
+		enable_interrupts();
 	while(1) {
 		controller_read(&controller); 
 		controller_begin_state();
@@ -273,23 +274,27 @@ static void switch_display(int32_t hi_res,int32_t depth,int32_t clear_fb,int32_t
 	}
 
 	if (was_inited) {
-		disable_interrupts(); rdp_close(); enable_interrupts(); 
+		disable_interrupts();
+		//rdpq_debug_stop();
+		//rdpq_close ();
+		enable_interrupts(); 
 		display_close();
 	}
 
-	
-	display_init((!hi_res) ?  RESOLUTION_256x240 : RESOLUTION_512x480,
-	(depth == 32) ? DEPTH_32_BPP : DEPTH_16_BPP,1,GAMMA_NONE,ANTIALIAS_RESAMPLE);
-	rdp_init();
+	display_init((!hi_res) ? RESOLUTION_256x240 : RESOLUTION_512x480,
+				 (depth == 32) ? DEPTH_32_BPP : DEPTH_16_BPP, 1, GAMMA_NONE, ANTIALIAS_RESAMPLE);
+	rdpq_init();
+	//rdpq_debug_start();
 	rdp_set_texture_flush(FLUSH_STRATEGY_NONE);
 	
-	while( !(disp = display_lock()) ) {} 
+	//while( !(disp = display_lock()) ) {} 
+	disp = display_get();
 	
 	if (clear_fb) { graphics_fill_screen(disp, 0); }
 	display_show(disp); 
 
 	//frame_buffer = (uint8_t*)display_grab_framebuffer_ptr(disp);//non cached
-	frame_buffer = display_get()->buffer;
+	frame_buffer = VirtualUncachedAddr(disp->buffer);
 	binded_display_ctx = disp;
 
 	screen_w = new_w;
@@ -301,7 +306,7 @@ static void switch_display(int32_t hi_res,int32_t depth,int32_t clear_fb,int32_t
 static int32_t init_everything()
 {	
 	int32_t res;
- 
+
 	rdp_scene_buffer = 0;
 	rdp_compiled_scene = 0;
 	res = fs_drv_init(0,0);
@@ -538,16 +543,19 @@ void browse_rom_data(uint32_t base_offset) {
 
 int main()
 {
+    debug_init_isviewer();
+    debug_init_usblog();
+	dfs_init(DFS_DEFAULT_LOCATION);
 	init_everything();
 
-#if __FS_BUILD__ != FS_N64_ROMFS
+#if (__FS_BUILD__ != FS_N64_ROMFS) && 0
 	menu_state_t state;
 	intro();
 	state = STATE_BROWSER;
 	do {
 		switch (state) {
 			case STATE_EMU: {
-				if (0xffff == binded_display_ctx) { /*Reached here unitialized -- ie quick load*/
+				if (NULL == binded_display_ctx) { /*Reached here unitialized -- ie quick load*/
 					switch_display(0,32,1,1);
 					fb_init(0,1);	
 				}
@@ -583,10 +591,10 @@ int main()
 	fb_init(0,1);	
 	graphics_fill_screen(binded_display_ctx, 0);
 
-	//
-	graphics_draw_text(binded_display_ctx,(screen_w>>1) - ((strlen("Official GNUBOYx86 port by (Dimitrios Vlachos : https://github.com/DimitrisVlachos)on((Dimitrios Vlachos : https://github.com/DimitrisVlachos)on1988@gmail.com)")<<3)>>1),(screen_h>>1)-(8/2),
-			"Official GNUBOYx86 port by (Dimitrios Vlachos : https://github.com/DimitrisVlachos)on((Dimitrios Vlachos : https://github.com/DimitrisVlachos)on1988@gmail.com)");
-	graphics_draw_text(binded_display_ctx,(screen_w>>1) - ((strlen("Visit : http://code.google.com/p/gnuboy/")<<3)>>1),(screen_h>>1)+32,
+	//const char str_to_print[] = "Official GNUBOYx86 port by (Dimitrios Vlachos : https://github.com/DimitrisVlachos)on((Dimitrios Vlachos : https://github.com/DimitrisVlachos)on1988@gmail.com)";
+	const char str_to_print[] = "Official GNUBOYx86 port by https://github.com/DimitrisVlachos";
+	graphics_draw_text(binded_display_ctx,(screen_w/2) - ((strlen(str_to_print)*8)/2),(screen_h/2)-(8/2), str_to_print);
+	graphics_draw_text(binded_display_ctx,(screen_w/2) - ((strlen("Visit : http://code.google.com/p/gnuboy/")*8)/2),(screen_h/2)+32,
 			"Visit : http://code.google.com/p/gnuboy/");
 #if 0
 	{
@@ -633,7 +641,13 @@ int main()
 	graphics_fill_screen(binded_display_ctx, 0);
 
 	disable_interrupts();
-	loader_init("blah.gb");
+
+	// TODO generatlize this
+	loader_init(
+		"rom://pkyellow.gbc"
+		//"rom://pkred.gb"
+		//"rom://tetris.gb"
+	);
 	enable_interrupts();
 	screen_info_changed = 1;
 	save_slot = 0;
@@ -641,7 +655,8 @@ int main()
 	emu_reset();
 	graphics_fill_screen(binded_display_ctx, 0);
 
-
+	//while(1) {;}
+	#if 0
 	{
 		disable_interrupts();
 		uint8_t dummy[256];
@@ -665,8 +680,9 @@ int main()
 		}
 		enable_interrupts();
 	}
+	#endif
 
-	#if 1
+	#if 0
 	{
 		extern int lcd_scale;
 		int32_t x = ((screen_w>>1) - ((160*lcd_scale)>>1))    ;
@@ -675,12 +691,12 @@ int main()
 		char dummy[128]={'\0'};
  		char tmp[256];
 		ctl_dma_rom_rd(dummy,0,128);
-		sprintf(tmp,"%02x %02x %02x %02x %02x %02x %02x %02x",
-		dummy[0],dummy[1],dummy[2],dummy[3],dummy[4],dummy[5],dummy[6],dummy[7]);
-		graphics_draw_text(binded_display_ctx,x,y,tmp);
-		sprintf(tmp,"%c %c %c %c %c %c %c %c",dummy[8],dummy[9],dummy[10],dummy[11],dummy[12],dummy[13],
-		dummy[14],dummy[15]);
-		graphics_draw_text(binded_display_ctx,x,y+8,tmp);
+		sprintf(tmp, "%02x %02x %02x %02x %02x %02x %02x %02x",
+				dummy[0], dummy[1], dummy[2], dummy[3], dummy[4], dummy[5], dummy[6], dummy[7]);
+		graphics_draw_text(binded_display_ctx, x, y, tmp);
+		sprintf(tmp, "%c %c %c %c %c %c %c %c", dummy[8], dummy[9], dummy[10], dummy[11], dummy[12], dummy[13],
+				dummy[14], dummy[15]);
+		graphics_draw_text(binded_display_ctx, x, y + 8, tmp);
 	}
 	#endif
 
